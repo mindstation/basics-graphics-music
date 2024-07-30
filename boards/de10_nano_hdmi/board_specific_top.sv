@@ -341,7 +341,7 @@ module board_specific_top
 
 
     assign HDMI_TX_CLK      = disp_clk;
-    assign HDMI_TX_D        = {hdmi_r,hdmi_g,hdmi_b};
+    assign HDMI_TX_D        = {{reg_vga_r,4'd0},{reg_vga_g,4'd0},{reg_vga_b,4'd0}};
     assign HDMI_TX_DE       = disp_de;
     assign HDMI_TX_HS       = disp_hs;
     assign HDMI_TX_VS       = disp_vs;
