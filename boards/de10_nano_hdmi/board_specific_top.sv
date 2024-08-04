@@ -4,7 +4,7 @@
 //--- VGA external ---
 // `define VGA666_BOARD
 // `define PMOD_VGA_BOARD
- `define MISTER_IO_BOARD
+// `define MISTER_IO_BOARD
 
 module board_specific_top
 # (
@@ -21,12 +21,12 @@ module board_specific_top
               // GPIO_0 [11], [13], [15], [17] are reserved for I2S audio.
               // GPIO_0[5:0] are reserved for INMP 441 I2S microphone.
 
-              screen_width  = 800,
-              screen_height = 525,
+              screen_width  = 640,
+              screen_height = 480,
 
-              w_red         = 6,
-              w_green       = 6,
-              w_blue        = 6,
+              w_red         = 4,
+              w_green       = 4,
+              w_blue        = 4,
 
               w_x           = $clog2 ( screen_width  ),
               w_y           = $clog2 ( screen_height )
@@ -265,54 +265,52 @@ module board_specific_top
 
     `elsif MISTER_IO_BOARD
 
-        // VGA out of MiSTer I/O board, 6 bit color used
+        // VGA out of MiSTer I/O board, 4 bit color used
         assign GPIO_1 [16] = vs;            // JP7 pin 19
         assign GPIO_1 [17] = hs;            // JP7 pin 20
         // R
-        assign GPIO_1 [35] = red [0];       // JP7 pin 40
-        assign GPIO_1 [33] = red [1];       // JP7 pin 38
-        assign GPIO_1 [31] = red [2];       // JP7 pin 36
-        assign GPIO_1 [29] = red [3];       // JP7 pin 34
-        assign GPIO_1 [27] = red [4];       // JP7 pin 32
-        assign GPIO_1 [25] = red [5];       // JP7 pin 28
+        assign GPIO_1 [35] = 1'b1;          // JP7 pin 40
+        assign GPIO_1 [33] = 1'b1;          // JP7 pin 38
+        assign GPIO_1 [31] = red [0];       // JP7 pin 36
+        assign GPIO_1 [29] = red [1];       // JP7 pin 34
+        assign GPIO_1 [27] = red [2];       // JP7 pin 32
+        assign GPIO_1 [25] = red [3];       // JP7 pin 28
         // G
-        assign GPIO_1 [34] = green [0];     // JP7 pin 39
-        assign GPIO_1 [32] = green [1];     // JP7 pin 37
-        assign GPIO_1 [30] = green [2];     // JP7 pin 35
-        assign GPIO_1 [28] = green [3];     // JP7 pin 33
-        assign GPIO_1 [26] = green [4];     // JP7 pin 31
-        assign GPIO_1 [24] = green [5];     // JP7 pin 27
+        assign GPIO_1 [34] = 1'b1;          // JP7 pin 39
+        assign GPIO_1 [32] = 1'b1;          // JP7 pin 37
+        assign GPIO_1 [30] = green [0];     // JP7 pin 35
+        assign GPIO_1 [28] = green [1];     // JP7 pin 33
+        assign GPIO_1 [26] = green [2];     // JP7 pin 31
+        assign GPIO_1 [24] = green [3];     // JP7 pin 27
         // B
-        assign GPIO_1 [19] = blue [0];      // JP7 pin 22
-        assign GPIO_1 [21] = blue [1];      // JP7 pin 24
-        assign GPIO_1 [23] = blue [2];      // JP7 pin 26
-        assign GPIO_1 [22] = blue [3];      // JP7 pin 25
-        assign GPIO_1 [20] = blue [4];      // JP7 pin 23
-        assign GPIO_1 [18] = blue [5];      // JP7 pin 21
+        assign GPIO_1 [19] = 1'b1;          // JP7 pin 22
+        assign GPIO_1 [21] = 1'b1;          // JP7 pin 24
+        assign GPIO_1 [23] = blue [0];      // JP7 pin 26
+        assign GPIO_1 [22] = blue [1];      // JP7 pin 25
+        assign GPIO_1 [20] = blue [2];      // JP7 pin 23
+        assign GPIO_1 [18] = blue [3];      // JP7 pin 21
 
     `endif
     //------------------------------------------------------------------------
 
-    //hdmi
-    wire       disp_clk;
-    logic      disp_de;
-    logic      disp_hs;
-    logic      disp_vs;
+    //HDMI
+    wire       pixel_clk;
+    wire       display_on;
 
-    //HDMI I2C
-    I2C_HDMI_Config u_I2C_HDMI_Config (
+    assign HDMI_TX_CLK      = pixel_clk;
+    assign HDMI_TX_D        = {{red,{(w_red){1'b1}}},{green,{(w_green){1'b1}}},{blue,{(w_blue){1'b1}}}};
+    assign HDMI_TX_DE       = display_on;
+    assign HDMI_TX_HS       = hs;
+    assign HDMI_TX_VS       = vs;
+
+    //HDMI I2C configurator
+    I2C_HDMI_Config i_i2c_hdmi_conf (
         .iCLK(clk),
         .iRST_N(~rst),
         .I2C_SCLK(HDMI_I2C_SCL),
         .I2C_SDAT(HDMI_I2C_SDA),
         .HDMI_TX_INT(HDMI_TX_INT)
-        );
-
-    assign HDMI_TX_CLK      = disp_clk;
-    assign HDMI_TX_D        = {{red,2'd0},{green,2'd0},{blue,2'd0}};
-    assign HDMI_TX_DE       = disp_de;
-    assign HDMI_TX_HS       = hs;
-    assign HDMI_TX_VS       = vs;
+    );
 
     //------------------------------------------------------------------------
 
@@ -347,10 +345,10 @@ module board_specific_top
             .rst         ( rst           ),
             .hsync       ( hs            ),
             .vsync       ( vs            ),
-            .display_on  ( disp_de       ),
+            .display_on  ( display_on    ),
             .hpos        ( x10           ),
             .vpos        ( y10           ),
-            .pixel_clk   ( disp_clk      )
+            .pixel_clk   ( pixel_clk     )
         );
 
     `endif
