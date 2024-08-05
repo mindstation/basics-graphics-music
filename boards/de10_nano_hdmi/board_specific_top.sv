@@ -303,6 +303,12 @@ module board_specific_top
     assign HDMI_TX_HS       = hs;
     assign HDMI_TX_VS       = vs;
 
+    // HDMI audio
+    assign HDMI_I2S         = 1'b0;
+    assign HDMI_LRCLK       = 1'b0;
+    assign HDMI_MCLK        = 1'b0;
+    assign HDMI_SCLK        = 1'b0;
+
     //HDMI I2C configurator
     I2C_HDMI_Config i_i2c_hdmi_conf (
         .iCLK(clk),
