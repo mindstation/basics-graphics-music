@@ -293,7 +293,7 @@ module board_specific_top
     `endif
     //------------------------------------------------------------------------
 
-    //HDMI
+    // HDMI Video
     wire       pixel_clk;
     wire       display_on;
 
@@ -309,7 +309,7 @@ module board_specific_top
     assign HDMI_MCLK        = 1'b0;
     assign HDMI_SCLK        = 1'b0;
 
-    //HDMI I2C configurator
+    // HDMI I2C configurator
     I2C_HDMI_Config i_i2c_hdmi_conf (
         .iCLK(clk),
         .iRST_N(~rst),
