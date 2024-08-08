@@ -73,7 +73,7 @@ module board_specific_top
     wire [ w_x      - 1:0] x;
     wire [ w_y      - 1:0] y;
 
-    wire                    vs, hs;
+    wire                   vs, hs;
 
     wire [ w_red    - 1:0] red;
     wire [ w_green  - 1:0] green;
