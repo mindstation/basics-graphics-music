@@ -291,6 +291,7 @@ module board_specific_top
         assign GPIO_1 [18] = blue [3];      // JP7 pin 21
 
     `endif
+
     //------------------------------------------------------------------------
 
     // HDMI Video
