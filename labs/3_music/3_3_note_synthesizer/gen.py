@@ -35,7 +35,7 @@ else:
     exit(usage)
 
 w = int(argv[3])
-A = 2**(w - 1) - 1
+A = (2**(w - 1) - 1)/16
 
 N = floor(Fs / F)
 x_max = N - 1
