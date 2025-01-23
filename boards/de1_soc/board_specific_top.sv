@@ -10,7 +10,10 @@ module board_specific_top
               w_sw          = 10,
               w_led         = 10,
               w_digit       = 6,
-              w_gpio        = 72,     // GPIO_0[5:0] reserved for mic
+              w_gpio        = 72,
+
+              // GPIO_0 0..5 are reserved for INMP 441 I2S microphone.
+              // Odd GPIO_0 27..33 are reserved I2S audio.
 
               screen_width  = 640,
               screen_height = 480,
@@ -282,21 +285,39 @@ module board_specific_top
 
     `ifdef INSTANTIATE_SOUND_OUTPUT_INTERFACE_MODULE
 
-        // DE1-SoC onboard audio codec: WM8731
+        wire mclk;
+        wire bclk;
+        wire lrclk;
+        wire i2s_dac_data;
+
         i2s_audio_out
         # (
-            .clk_mhz ( clk_mhz      )
+            .clk_mhz ( clk_mhz   )
         )
         i_audio_out
         (
             .clk     ( clk          ),
             .reset   ( rst          ),
             .data_in ( sound        ),
-            .mclk    ( AUD_XCK      ),
-            .bclk    ( AUD_BCLK     ),
-            .lrclk   ( AUD_DACLRCK  ),
-            .sdata   ( AUD_DACDAT   )
+            .mclk    ( mclk         ),
+            .bclk    ( bclk         ),
+            .lrclk   ( lrclk        ),
+            .sdata   ( i2s_dac_data )
         );
+
+        assign GPIO_0 [33] = mclk;          // JP1 pin 38
+        assign GPIO_0 [31] = bclk;          // JP1 pin 36
+        assign GPIO_0 [29] = i2s_dac_data;  // JP1 pin 34
+        assign GPIO_0 [27] = lrclk;         // JP1 pin 32
+                                            // JP1 pin 30 - GND
+                                            // JP1 pin 29 - VCC 3.3V (30-45 mA)
+
+        // DE1-SoC onboard audio codec: WM8731
+        // The audio codec interface
+        assign AUD_XCK     = mclk;
+        assign AUD_BCLK    = bclk;
+        assign AUD_DACLRCK = lrclk;
+        assign AUD_DACDAT  = i2s_dac_data;
 
         // The audio codec configuration
         I2C_AUDIO_Config
