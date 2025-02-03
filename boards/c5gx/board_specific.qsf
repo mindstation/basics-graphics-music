@@ -13,6 +13,8 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to CPU_RESET_n
 
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to GPIO[*]
 
+set_instance_assignment -name IO_STANDARD "2.5 V"       -to AUD_*
+
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HDMI_TX_CLK
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HDMI_TX_D[*]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HDMI_TX_DE
@@ -84,6 +86,13 @@ set_location_assignment PIN_A5   -to LEDG[4]
 set_location_assignment PIN_B6   -to LEDG[5]
 set_location_assignment PIN_H8   -to LEDG[6]
 set_location_assignment PIN_H9   -to LEDG[7]
+
+set_location_assignment PIN_D7   -to AUD_ADCDAT
+set_location_assignment PIN_C7   -to AUD_ADCLRCK
+set_location_assignment PIN_E6   -to AUD_BCLK
+set_location_assignment PIN_H10  -to AUD_DACDAT
+set_location_assignment PIN_G10  -to AUD_DACLRCK
+set_location_assignment PIN_D6   -to AUD_XCK
 
 set_location_assignment PIN_Y25  -to HDMI_TX_CLK
 set_location_assignment PIN_V23  -to HDMI_TX_D[0]

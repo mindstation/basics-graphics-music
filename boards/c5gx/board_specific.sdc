@@ -1,8 +1,8 @@
 create_clock -period "50.0 MHz" [get_ports CLOCK_50_B8A]
 
-# for calculating divide_by value see CLK_Freq/I2C_Freq in boards/c5gx/board_specific_top.sv
+# for calculating divide_by value see CLK_Freq/I2C_Freq in boards/c5gx/I2C_AV_Config.v
 
-create_generated_clock -name i2c_controller_clk -divide_by 2500 -source [get_ports { CLOCK_50_B8A }] [get_registers { I2C_HDMI_Config:i_i2c_hdmi_conf|mI2C_CTRL_CLK }]
+create_generated_clock -name i2c_controller_clk -divide_by 2500 -source [get_ports { CLOCK_50_B8A }] [get_registers { I2C_AV_Config:i_i2c_av_conf|mI2C_CTRL_CLK }]
 
 derive_clock_uncertainty
 
