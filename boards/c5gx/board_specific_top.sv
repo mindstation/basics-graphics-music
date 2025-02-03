@@ -1,6 +1,13 @@
 `include "config.svh"
 `include "lab_specific_board_config.svh"
 
+`ifdef INSTANTIATE_SOUND_OUTPUT_INTERFACE_MODULE
+    `define CONTROLLERS_CONF_I2C
+`endif
+`ifdef INSTANTIATE_GRAPHICS_INTERFACE_MODULE
+    `define CONTROLLERS_CONF_I2C
+`endif
+
 module board_specific_top
 # (
     parameter clk_mhz       = 50,
@@ -33,6 +40,13 @@ module board_specific_top
     input  [w_sw   - 1:0] SW,
     output logic [   9:0] LEDR,       // The last 4 LEDR are used like a 7SEG dp
     output logic [   7:0] LEDG,
+
+    input                 AUD_ADCDAT,
+    inout                 AUD_ADCLRCK,
+    inout                 AUD_BCLK,
+    output                AUD_DACDAT,
+    inout                 AUD_DACLRCK,
+    output                AUD_XCK,
 
     output                HDMI_TX_CLK,
     output       [  23:0] HDMI_TX_D,
@@ -253,15 +267,6 @@ module board_specific_top
         assign HDMI_TX_HS       = hs;
         assign HDMI_TX_VS       = vs;
 
-        // HDMI transmitter configuration
-        I2C_HDMI_Config i_i2c_hdmi_conf (
-            .iCLK(clk),
-            .iRST_N(~rst),
-            .I2C_SCLK(I2C_SCL),
-            .I2C_SDAT(I2C_SDA),
-            .HDMI_TX_INT(HDMI_TX_INT)
-        );
-
     `endif
 
     //------------------------------------------------------------------------
@@ -292,20 +297,55 @@ module board_specific_top
 
     `ifdef INSTANTIATE_SOUND_OUTPUT_INTERFACE_MODULE
 
+        wire mclk;
+        wire bclk;
+        wire lrclk;
+        wire i2s_dac_data;
+
         i2s_audio_out
         # (
             .clk_mhz ( clk_mhz     )
         )
         inst_audio_out
         (
-            .clk     ( clk         ),
-            .reset   ( rst         ),
-            .data_in ( sound       ),
-            .mclk    ( GPIO [17] ), // JP9 pin 20
-            .bclk    ( GPIO [15] ), // JP9 pin 18
-            .lrclk   ( GPIO [11] ), // JP9 pin 14
-            .sdata   ( GPIO [13] )  // JP9 pin 16
-        );                          // JP9 pin 12 - GND, pin 29 - VCC 3.3V (30-45 mA)
+            .clk     ( clk          ),
+            .reset   ( rst          ),
+            .data_in ( sound        ),
+            .mclk    ( mclk         ),
+            .bclk    ( bclk         ),
+            .lrclk   ( lrclk        ),
+            .sdata   ( i2s_dac_data )
+        );
+
+        assign GPIO [17] = mclk;         // JP9 pin 20
+        assign GPIO [15] = bclk;         // JP9 pin 18
+        assign GPIO [13] = i2s_dac_data; // JP9 pin 16
+        assign GPIO [11] = lrclk;        // JP9 pin 14
+                                         // JP9 pin 12 - GND, pin 29 - VCC 3.3V (30-45 mA)
+
+        // VCC and GND for i2s_audio_out are on dedicated pins
+
+        // "Cyclone V GX Starter Kit" onboard audio codec: SSM2603
+        // The audio codec interface
+        assign AUD_XCK     = mclk;
+        assign AUD_BCLK    = bclk;
+        assign AUD_DACLRCK = lrclk;
+        assign AUD_DACDAT  = i2s_dac_data;
+
+    `endif
+
+    //------------------------------------------------------------------------
+
+    `ifdef CONTROLLERS_CONF_I2C
+
+        // HDMI transmitter and audio codec configuration
+        I2C_AV_Config i_i2c_av_conf (
+            .iCLK(clk),
+            .iRST_N(~rst),
+            .I2C_SCLK(I2C_SCL),
+            .I2C_SDAT(I2C_SDA),
+            .HDMI_TX_INT(HDMI_TX_INT)
+        );
 
     `endif
 
