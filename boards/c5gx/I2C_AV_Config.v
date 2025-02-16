@@ -170,19 +170,19 @@ end
 always
 begin
 	case(LUT_INDEX)
-	//	Audio Config Data
-	Dummy_DATA	:	LUT_DATA	<=	16'h0000;
-	SET_LIN_L	:	LUT_DATA	<=	16'h001A;
-	SET_LIN_R	:	LUT_DATA	<=	16'h021A;
-	SET_HEAD_L	:	LUT_DATA	<=	16'h047B;
-	SET_HEAD_R	:	LUT_DATA	<=	16'h067B;
-	A_PATH_CTRL	:	LUT_DATA	<=	16'h08F8;
-	D_PATH_CTRL	:	LUT_DATA	<=	16'h0A06;
-	POWER_ON	:	LUT_DATA	<=	16'h0C00;
-	SET_FORMAT	:	LUT_DATA	<=	16'h0E01;
-	SAMPLE_CTRL	:	LUT_DATA	<=	16'h1002;
-	SET_ACTIVE	:	LUT_DATA	<=	16'h1201;
-	//	Video Config Data
+    //  Audio Config Data: 7 bit reg address + 9 bits of data
+    Dummy_DATA  :   LUT_DATA <= 16'h0000;
+    SET_LIN_L   :   LUT_DATA <= 16'h0017;   //R0 LINVOL = 17h (+0.0bB)
+    SET_LIN_R   :   LUT_DATA <= 16'h0217;   //R1 RINVOL = 17h (+0.0bB)
+    SET_HEAD_L  :   LUT_DATA <= 16'h0460;   //R2 LHPVOL = 60h (-43dB)
+    SET_HEAD_R  :   LUT_DATA <= 16'h0660;   //R3 RHPVOL = 60h (-43dB)
+    A_PATH_CTRL :   LUT_DATA <= 16'h08D2;   //R4 DACSEL = 1
+    D_PATH_CTRL :   LUT_DATA <= 16'h0A06;   //R5 DEEMP = 11 (48 KHz)
+    POWER_ON    :   LUT_DATA <= 16'h0C00;   //R6 PWR_CTL = 00h (disable power down)
+    SET_FORMAT  :   LUT_DATA <= 16'h0E02;   //R7 FORMAT=10(I2S), 16 bit
+    SAMPLE_CTRL :   LUT_DATA <= 16'h10A0;   //R8 MCLK=24.576 MHz, Sample=48KHz, Normal mode
+    SET_ACTIVE  :   LUT_DATA <= 16'h1201;   //R9 ACTIVE
+    //  Video Config Data
 	SET_HDMI+1	:	LUT_DATA	<=	16'h9803;  //Must be set to 0x03 for proper operation
 	SET_HDMI+2	:	LUT_DATA	<=	16'h0100;  //Set 'N' value at 6144
 	SET_HDMI+3	:	LUT_DATA	<=	16'h0218;  //Set 'N' value at 6144
