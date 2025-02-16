@@ -165,7 +165,7 @@ begin
     D_PATH_CTRL :   LUT_DATA <= 16'h0A06;   //R5 DEEMP = 11 (48 KHz)
     POWER_ON    :   LUT_DATA <= 16'h0C00;   //R6 PWR_CTL = 00h (disable power down)
     SET_FORMAT  :   LUT_DATA <= 16'h0E02;   //R7 FORMAT=10(I2S), 16 bit
-    SAMPLE_CTRL :   LUT_DATA <= 16'h1002;   //R8 48KHz, Normal mode
+    SAMPLE_CTRL :   LUT_DATA <= 16'h10A0;   //R8 MCLK=24.576 MHz, Sample=48KHz, Normal mode
     SET_ACTIVE  :   LUT_DATA <= 16'h1201;   //R9 ACTIVE
     default     :   LUT_DATA <= 16'h0000;
     endcase
