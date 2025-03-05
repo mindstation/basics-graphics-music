@@ -15,3 +15,20 @@ set_false_path -from * -to [get_ports {VGA_*}]
 set_false_path -from * -to UART_CTS
 set_false_path -from * -to UART_TXD
 set_false_path -from * -to [get_ports {GPIO[*]}]
+
+#///////////////////////////////////////////////////
+#            SDRAM
+#///////////////////////////////////////////////////
+# FPGA output to SDRAM inputs delay (addr, ba, dq, dqm, ras_n, cas_n, we_n IS42S16320D-7TL have same hold and setup time)
+# Tds, Tas
+set sdram_input_setup 1.5
+# Tdh, Tah
+set sdram_input_hold -0.8
+set_output_delay -clock sdram_clk -max $sdram_input_setup [get_ports DRAM_*]
+set_output_delay -clock sdram_clk -min $sdram_input_hold [get_ports DRAM_*]
+
+# SDRAM IS42S16320D-7TL output to FPGA inputs delay
+set sdram_Tac2 6
+set sdram_Toh2 2.7
+set_input_delay -clock sdram_clk -max $sdram_Tac2 [get_ports DRAM_DQ[*]]
+set_input_delay -clock sdram_clk -min $sdram_Toh2 [get_ports DRAM_DQ[*]]

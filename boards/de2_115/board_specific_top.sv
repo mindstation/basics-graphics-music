@@ -42,6 +42,17 @@ module board_specific_top
     output logic [     6:0] HEX6,
     output logic [     6:0] HEX7,
 
+    output                  DRAM_CLK,
+    output                  DRAM_CKE,
+    output [          12:0] DRAM_ADDR,
+    output [           1:0] DRAM_BA,
+    inout  [          31:0] DRAM_DQ,
+    output [           1:0] DRAM_DQM,
+    output                  DRAM_CS_N,
+    output                  DRAM_CAS_N,
+    output                  DRAM_RAS_N,
+    output                  DRAM_WE_N,
+
     output                  VGA_CLK,
     output                  VGA_HS,
     output                  VGA_VS,
@@ -149,6 +160,14 @@ module board_specific_top
         .mic           (   mic           ),
         .sound         (   sound         ),
 
+        .ram_addr      (   ram_addr      ),
+        .ram_wdata     (   ram_wdata     ),
+        .ram_rdata     (   ram_rdata     ),
+        .wrl           (   wrl           ),
+        .wrh           (   wrh           ),
+        .ram_req       (   ram_req       ),
+        .ram_ack       (   ram_ack       ),
+        
         .uart_rx       (   UART_RXD      ),
         .uart_tx       (   UART_TXD      ),
 
@@ -231,6 +250,95 @@ module board_specific_top
                         LEDR [$bits (LEDR) - w_digit + i] <=  hgfedcba [$left (HEX0) + 1];
             end
         end
+
+    `endif
+
+    //------------------------------------------------------------------------
+
+    `ifdef INSTANTIATE_SDRAM_CONTROLLER_MODULE
+
+        wire        clk_ram;
+        wire        locked;
+        wire [24:1] ram_addr;
+        wire        ram_req,ram_ack,wrl,wrh;
+        wire [15:0] ram_wdata, ram_rdata;
+
+        pll
+        i_sdram_pll
+        (
+            .inclk0(CLOCK_50),
+            .c0(),
+            .c1(clk_ram), // 107.142860 MHz Is 100 better?
+            .locked(locked)
+        );
+
+        sdram_32b_wrapper
+        i_sdram_32b
+        (
+            .clk (),
+            .rst (),
+            
+            .addr_i (),
+            .data_i (),
+            .wrl_i  (),
+            .wrh_i  (),
+            .req_i  (),
+            .ack_i  (),
+            
+            .addr_o (),
+            .data_o (),
+            .wrl_o  (),
+            .wrh_o  (),
+            .req_o  (),
+            .ack_o  (), 
+        )
+        
+        sdram
+        i_sdram_ctl
+        (
+            .SDRAM_DQ   ( DRAM_DQ[15:0] ),   // 16 bit bidirectional data bus
+            .SDRAM_A    ( DRAM_ADDR     ),   // 13 bit multiplexed address bus
+            .SDRAM_DQML ( DRAM_DQM[0]   ),   // byte mask
+            .SDRAM_DQMH ( DRAM_DQM[1]   ),   // byte mask
+            .SDRAM_BA   ( DRAM_BA       ),   // two banks
+            .SDRAM_nCS  ( DRAM_CS_N     ),   // a single chip select
+            .SDRAM_nWE  ( DRAM_WE_N     ),   // write enable
+            .SDRAM_nRAS ( DRAM_RAS_N    ),   // row address select
+            .SDRAM_nCAS ( DRAM_CAS_N    ),   // columns address select
+            .SDRAM_CLK  ( DRAM_CLK      ),
+            .SDRAM_CKE  ( DRAM_CKE      ),
+
+            .init       ( ~locked       ),
+            .clk        ( clk_ram       ),
+
+            .addr0      ( 24'b0         ),
+            .din0       ( 16'b0         ),
+            .dout0      (),
+            .wrl0       ( 1'b0          ),
+            .wrh0       ( 1'b0          ),
+            .req0       ( 1'b0          ),
+            .ack0       (),
+
+            // addr1[24:23] is a bank number, addr1[13:1] is a row number, addr1[22:14] is a column number
+            .addr1      ( {ram_addr[24:23],
+                           ram_addr[9:1],
+                           ram_addr[22:10]}),
+            .din1       ( ram_wdata     ),
+            .dout1      ( ram_rdata     ),
+            // If wrl1 or wrh1 is 1, then write data
+            .wrl1       ( wrl           ),
+            .wrh1       ( wrh           ),
+            .req1       ( ram_req       ),
+            .ack1       ( ram_ack       ),
+
+            .addr2      ( 24'b0         ),
+            .din2       ( 16'b0         ),
+            .dout2      (),
+            .wrl2       ( 1'b0          ),
+            .wrh2       ( 1'b0          ),
+            .req2       ( 1'b0          ),
+            .ack2       (),
+        );
 
     `endif
 
