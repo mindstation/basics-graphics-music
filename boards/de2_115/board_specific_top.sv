@@ -160,14 +160,13 @@ module board_specific_top
         .mic           (   mic           ),
         .sound         (   sound         ),
 
-        .ram_addr      (   ram_addr      ),
-        .ram_wdata     (   ram_wdata     ),
-        .ram_rdata     (   ram_rdata     ),
-        .wrl           (   wrl           ),
-        .wrh           (   wrh           ),
-        .ram_req       (   ram_req       ),
-        .ram_ack       (   ram_ack       ),
-        
+        .ram_addr      (   ram_addr_wrp32  ),
+        .ram_wdata     (   ram_wdata_wrp32 ),
+        .ram_rdata     (   ram_rdata_wrp32 ),
+        .ram_wr        (   ram_wr          ),
+        .ram_req       (   ram_req_wrp32   ),
+        .ram_ack       (   ram_ack_wrp32   ),
+
         .uart_rx       (   UART_RXD      ),
         .uart_tx       (   UART_TXD      ),
 
@@ -257,16 +256,22 @@ module board_specific_top
 
     `ifdef INSTANTIATE_SDRAM_CONTROLLER_MODULE
 
-        wire        clk_ram;
-        wire        locked;
+        wire [24:1] ram_addr_wrp32;
+        wire        ram_req_wrp32,ram_ack_wrp32;
+        wire        ram_wr;
+        wire [31:0] ram_wdata_wrp32, ram_rdata_wrp32;
+
         wire [24:1] ram_addr;
         wire        ram_req,ram_ack,wrl,wrh;
-        wire [15:0] ram_wdata, ram_rdata;
+        wire [15:0] ram_wdata_16, ram_rdata_16;
+
+        wire        clk_ram;
+        wire        locked;
 
         pll
         i_sdram_pll
         (
-            .inclk0(CLOCK_50),
+            .inclk0(clk),
             .c0(),
             .c1(clk_ram), // 107.142860 MHz Is 100 better?
             .locked(locked)
@@ -275,24 +280,25 @@ module board_specific_top
         sdram_32b_wrapper
         i_sdram_32b
         (
-            .clk (),
-            .rst (),
+            .clk        ( clk            ),
+            .rst        ( rst            ),
             
-            .addr_i (),
-            .data_i (),
-            .wrl_i  (),
-            .wrh_i  (),
-            .req_i  (),
-            .ack_i  (),
-            
-            .addr_o (),
-            .data_o (),
-            .wrl_o  (),
-            .wrh_o  (),
-            .req_o  (),
-            .ack_o  (), 
+            .addr_i    ( ram_addr_wrp32  ),
+            .wdata_32i ( ram_wdata_wrp32 ),
+            .rdata_32o ( ram_rdata_wrp32 ),
+            .wr_i      ( ram_wr          ),
+            .req_i     ( ram_req_wrp32   ),
+            .ack_o     ( ram_ack_wrp32   ),
+
+            .addr_o    ( ram_addr        ),
+            .wdata_16o ( ram_wdata_16    ),
+            .rdata_16i ( ram_rdata_16    ),
+            .wrl_o     ( wrl             ),
+            .wrh_o     ( wrh             ),
+            .req_o     ( ram_req         ),
+            .ack_i     ( ram_ack         )
         )
-        
+
         sdram
         i_sdram_ctl
         (
@@ -323,8 +329,8 @@ module board_specific_top
             .addr1      ( {ram_addr[24:23],
                            ram_addr[9:1],
                            ram_addr[22:10]}),
-            .din1       ( ram_wdata     ),
-            .dout1      ( ram_rdata     ),
+            .din1       ( ram_wdata_16  ),
+            .dout1      ( ram_rdata_16  ),
             // If wrl1 or wrh1 is 1, then write data
             .wrl1       ( wrl           ),
             .wrh1       ( wrh           ),

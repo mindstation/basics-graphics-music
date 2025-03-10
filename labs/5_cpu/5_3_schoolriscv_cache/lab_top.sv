@@ -49,6 +49,13 @@ module lab_top
     input        [         23:0] mic,
     output       [         15:0] sound,
 
+    output       [         24:1] ram_addr,
+    output       [         31:0] ram_wdata,
+    input        [         31:0] ram_rdata,
+    output                       ram_wr,
+    output                       ram_req,
+    input                        ram_ack,
+
     input                        uart_rx,
     output                       uart_tx,
 
